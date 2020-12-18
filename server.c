@@ -53,7 +53,7 @@ void printAll()
     temp = head;
     while(temp)
     {
-    	printf("%20s %20s %d",temp->username, temp->password, temp->status;
+    	printf("%20s %20s %d",temp->username, temp->password, temp->status);
         printf("\n");
         temp=temp->next;
     }
@@ -110,7 +110,7 @@ void registerAccount(){
 	printf("Account existed!");	
 	} 
 	else{
-		insert(username, password, 2);
+		insert(username, password, 1);
 		writeFile();
 		printf("Successful registration. Activation required.\n");
 	}
@@ -333,11 +333,6 @@ pid_t fork(void);
 int main(int argc, char* argv[]){
 
     openFile();
-	openFileScore();
-
-	strScore = special_char_remplace();
-	strInstr = special_char_remplace1();
-	
 
 	pid_t pid;
     int listenfd, connfd, n, portNumber;
@@ -361,8 +356,10 @@ int main(int argc, char* argv[]){
     listen(listenfd, MAX_LISTEN_QUEUE);
     printf("%s\n", "Server running...waiting for connections.");
 
+    makeQuestion();
     node *acc;
-	int option = 0, regis = 0, login = 0, numAns = 0, num = 0;
+	int loginVar = 0;
+    char username[20], password[20];
 	
     // communicate with client
     while(1){
@@ -375,7 +372,57 @@ int main(int argc, char* argv[]){
 			close(listenfd); 	             // child closes listening socket
 			
 			while(n = recv(connfd, buff, MAXLINE, 0) > 0){
+                if (strcmp(buff,"1") == 0 && loginVar == 0) {
+                    loginVar = 1;
+                    sendMess("--- Nhập tên tài khoản mới ---", connfd, (struct sockaddr*) &cliaddr);
+                }
+                else if (strcmp(buff,"2") == 0 && loginVar == 0) {
+                    sendMess("--- Nhập tên tài khoản của bạn ---", connfd, (struct sockaddr*) &cliaddr);
+                    loginVar = 3;
+                }
+                else {
+                    switch (loginVar) {
+                        case 1: 
+                        if (find(buff) == NULL) {
+                            sendMess("--- Nhập mật khẩu ---", connfd, (struct sockaddr*) &cliaddr);
+                            strcpy (username, buff);
+                            loginVar = 2;
+                        }
+                        else {
+                            sendMess("--- Tài khoản đã tồn tại ---", connfd, (struct sockaddr*) &cliaddr);
+                            loginVar = 0;
+                        }
+                        break;
 
+                        case 2:
+                        sendMess("--- Tạo tài khoản thành công ---", connfd, (struct sockaddr*) &cliaddr);
+                        strcpy (password, buff);
+                        insert (username,password,1);
+                        writeFile();
+                        break;
+
+                        case 3:
+                        acc = find(buff);
+                        if (acc == NULL) {
+                            sendMess("--- Tài khoản không tồn tại ---", connfd, (struct sockaddr*) &cliaddr);
+                            loginVar = 0;
+                        }
+                        else {
+                            sendMess("--- Nhập mật khẩu ---", connfd, (struct sockaddr*) &cliaddr);
+                            loginVar = 4;
+                        }
+                        break;
+
+                        case 4:
+                        if (strcmp(acc->password,buff) == 0) {
+                            sendMess("--- Đăng nhập thành công ---", connfd, (struct sockaddr*) &cliaddr);
+                        }
+                        else {
+                            sendMess("--- Mật khẩu không chính xác ---", connfd, (struct sockaddr*) &cliaddr);
+                            loginVar = 0;
+                        }
+                    }
+                }
         	}
 
 			exit(0);			

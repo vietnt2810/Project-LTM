@@ -9,6 +9,18 @@
 #define MAXLINE 1000
 #define MAX_LISTEN_QUEUE 1000
 
+//////////////////////////////////////// Menu Function ////////////////////////////////////////
+void loginMenu() {
+    printf("1. Đăng ký tài khoản.\n");
+    printf("2. Đăng nhập tài khoản.\n");
+}
+void mainMenu() {
+    printf("1. Chơi.\n");
+    printf("2. Đổi mật khẩu.\n");
+    printf("3. Đăng xuất.\n");
+}
+//////////////////////////////////////// Menu Function ////////////////////////////////////////
+
 int main(int argc, char *argv[]){
     int sockfd, serverPortNum, sendBytes, rcvBytes;
     struct sockaddr_in servaddr;
@@ -36,6 +48,7 @@ int main(int argc, char *argv[]){
         exit(-1);
     }
 
+    loginMenu();
 
     while(1){
         fflush(stdin);
@@ -53,6 +66,22 @@ int main(int argc, char *argv[]){
             return 0;
         }
         server_response[rcvBytes] = '\0';
-        printf("%s\n", server_response);   
+        printf("%s\n", server_response);  
+
+        if(strcmp(server_response, "--- Tài khoản đã tồn tại ---") == 0){
+            loginMenu();
+        } 
+
+        if(strcmp(server_response, "--- Tài khoản không tồn tại ---") == 0){
+            loginMenu();
+        }
+
+        if(strcmp(server_response, "--- Mật khẩu không chính xác ---") == 0){
+            loginMenu();
+        }
+
+        if(strcmp(server_response, "--- Tạo tài khoản thành công ---") == 0){
+            mainMenu();
+        } 
     }
 }
