@@ -260,7 +260,61 @@ node *signout(){
 	}
 	else return acc;
 }
+//////////////////////////////////////// Account ////////////////////////////////////////
+//////////////////////////////////////// Question ////////////////////////////////////////
+typedef struct bank{
+    char question[120];
+    char choiceA[70];
+    char choiceB[70];
+    char answer[5];
+}Bank;
+ 
+typedef struct question
+{
+    char word[1000];
+    char answer[5];
+}Question;
 
+Bank setQuestion[10];
+Question questionList[10];
+FILE *question;
+
+void readQuestion(){ // Gets and stores questions
+    if((question = fopen("question.txt", "r"))==NULL){
+        printf("File doesn't exist!\n");
+		return;
+    }
+    else{
+        while(!feof(question)){
+            for(int i=0; i<10; i++){ // Reads the questions from file
+                fgets(setQuestion[i].question, 120, question);
+                fgets(setQuestion[i].choiceA, 70, question);
+                fgets(setQuestion[i].choiceB, 70, question);
+                fgets(setQuestion[i].answer, 70, question);
+            }
+        }
+    }
+    fclose(question);
+}
+
+void makeQuestion(){
+    Question *buff;
+    readQuestion();
+    for (int i = 0; i < 10; i++)
+    {
+        buff = (Question *)malloc(sizeof(Question));
+        strcpy((*buff).word, setQuestion[i].question);
+        strcat((*buff).word, setQuestion[i].choiceA);
+        strcat((*buff).word, setQuestion[i].choiceB);
+		(*buff).word[strlen((*buff).word) - 1] = '\0';
+        strcpy((*buff).answer, setQuestion[i].answer);
+		(*buff).answer[strlen((*buff).answer) - 1] = '\0';
+        strcpy(questionList[i].word, (*buff).word);
+        strcpy(questionList[i].answer, (*buff).answer);
+        free(buff);
+    }
+}
+//////////////////////////////////////// Question ////////////////////////////////////////
 void sendMess(char *content, int sockfd, struct sockaddr *servaddr){
 	int len, sendBytes;
 	  
